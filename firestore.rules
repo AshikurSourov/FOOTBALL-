@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() { return request.auth != null && request.auth.uid == '7UquO3Q0USVITl30DQcAgfqKXxq1'; }
+    match /registrations/{id} {
+      allow create: if request.resource.data.keys().hasAll([
+        'fullName','village','phone','bloodGroup','age','role','jerseySize','jerseyNumber',
+        'paymentMethod','transactionId','senderPhone','photoURL','storagePath','status',
+        'category','basePrice','feeTotal','entryFee','jerseyFee','createdAt'
+      ])
+      && request.resource.data.keys().hasOnly([
+        'fullName','village','phone','bloodGroup','age','role','jerseySize','jerseyNumber',
+        'paymentMethod','transactionId','senderPhone','photoURL','storagePath','status',
+        'category','basePrice','feeTotal','entryFee','jerseyFee','createdAt'
+      ])
+      && request.resource.data.fullName is string && request.resource.data.fullName.size() >= 2 && request.resource.data.fullName.size() <= 70
+      && request.resource.data.village is string && request.resource.data.village.size() >= 2 && request.resource.data.village.size() <= 60
+      && request.resource.data.phone is string && request.resource.data.phone.size() >= 10 && request.resource.data.phone.size() <= 16
+      && request.resource.data.bloodGroup in ['A+','A-','B+','B-','AB+','AB-','O+','O-','জানি না']
+      && request.resource.data.age is int && request.resource.data.age >= 10 && request.resource.data.age <= 70
+      && request.resource.data.role in ['গোলকিপার','ডিফেন্ডার','মিডফিল্ডার','ফরোয়ার্ড']
+      && request.resource.data.jerseySize in ['S','M','L','XL','XXL','XXXL']
+      && request.resource.data.paymentMethod in ['bKash','Nagad','Rocket','Cash']
+      && request.resource.data.transactionId is string && request.resource.data.transactionId.size() >= 3 && request.resource.data.transactionId.size() <= 40
+      && request.resource.data.senderPhone is string
+      && request.resource.data.photoURL is string && request.resource.data.storagePath is string
+      && request.resource.data.status == 'pending'
+      && request.resource.data.category == '' && request.resource.data.basePrice == 0;
+      allow read, update, delete: if isAdmin();
+    }
+    match /publicCards/{id} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update, delete: if isAdmin();
+    }
+    match /publicSettings/payment {
+      allow get: if true;
+      allow list: if false;
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}

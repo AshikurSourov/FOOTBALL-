@@ -1,0 +1,13 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /player-photos/{fileName} {
+      // Public upload is restricted to small image files. Firestore registration writes
+      // are independently validated; configure App Check before production launch.
+      allow write: if request.resource != null
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+      allow read: if true;
+    }
+  }
+}
